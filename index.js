@@ -6,6 +6,9 @@ app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
 
 
+
+//Lista com os games (pode alterar para algum banco de dados.)
+
 let DB = {
     games: [
         {
