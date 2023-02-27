@@ -30,7 +30,22 @@ let DB = {
             year: 2012,
             price: 130
         }
+    ],
+    users: [
+        {
+            id: 1,
+            name: "Guilherme Moreira",
+            email: "remix@gmail.com",
+            password: "nodejs<3"
+        },
+        {
+            id: 20,
+            name: "Remix",
+            email: "guigg@gmail.com",
+            password: "Java123"
+        }
     ]
+    
 }
 
 
@@ -142,6 +157,34 @@ app.put("/game/:id", (req, res) => {
             res.sendStatus(404)
         }
 
+    }
+})
+
+
+app.post("/auth", (req, res) => {
+    var {email, password} = req.body
+
+    if(email != undefined) {
+        var user = DB.users.find(u => u.email == email)
+
+        if(user != undefined) {
+
+            if(user.password == password) {
+                res.status(200)
+                res.json({token: "TOKEN FALSO!"})
+            } else {
+                res.status(401);
+                res.json({err: "Senha Inválida!"})
+            }
+
+        } else {
+            res.status(404)
+            console.log("caiu aqui")
+        }
+
+    } else {
+        res.status(404)
+        console.log("Erro")
     }
 })
 
