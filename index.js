@@ -2,11 +2,45 @@ const express = require('express')
 const app = express()
 const cors = require('cors')
 const bodyParser = require('body-parser')
+const jwt = require('jsonwebtoken')
 
 app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
 
 app.use(cors())
+
+
+const jwtSecret = "dkwoskaodjaoidjwfwjfadnaoid21@#EDJIWDJA"
+
+
+function auth(req, res, next) { //Middleware
+
+    const authToken = req.headers['authorization'];
+
+    if(authToken != undefined) {
+
+        const bearer = authToken.split(' ')
+        const token = bearer[1]
+
+        jwt.verify(token,jwtSecret,(erro, data) => {
+            if(erro) {
+                res.status(401)
+                res.json({err: "Token Inválido"})
+            } else {
+                req.token = token
+                req.loggedUser = {id: data.id, email: data.email}
+                console.log(data)
+            }
+        })
+
+    }else {
+        res.status(401)
+        res.json({erro: "Token Inválido"})
+    }
+    next() //Responsável para passar a requisição na rota.
+
+}
+
 
 //Lista com os games (pode alterar para algum banco de dados.)
 
@@ -51,7 +85,7 @@ let DB = {
 
 //Get (Buscar todos os itens)
 
-app.get("/games", (req, res) => {
+app.get("/games",auth, (req, res) => {
     res.statusCode = 200
     res.json(DB.games)
 })
@@ -170,8 +204,14 @@ app.post("/auth", (req, res) => {
         if(user != undefined) {
 
             if(user.password == password) {
-                res.status(200)
-                res.json({token: "TOKEN FALSO!"})
+               jwt.sign({id:user.id, email: user.email},jwtSecret,{expiresIn: "48h"}, (err, token) => {
+                if(err) {
+                    res.status(400)
+                } else {
+                    res.status(200)
+                    res.json({token: token})
+                }
+               })
             } else {
                 res.status(401);
                 res.json({err: "Senha Inválida!"})
