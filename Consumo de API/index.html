@@ -38,6 +38,7 @@
         }
     }
 
+    //Login
     function login(){
         var email = document.getElementById('email').value
         var password = document.getElementById('password').value
@@ -57,6 +58,7 @@
 
     }
 
+    //Criar um novo jogo
     function createGame() {
         var titleInput = document.getElementById('title')
         var yearInput = document.getElementById('year')
@@ -93,6 +95,7 @@
         document.getElementById("priceEdit").value = price
     }
 
+    //Atualizar 
     function updateGame() {
 
         var idInput = document.getElementById("idEdit")
@@ -121,6 +124,7 @@
 
     }
 
+    //Deletar jogo
     function deleteGame(listItem) {
         var id = listItem.getAttribute("data-id")
         console.log(id)
@@ -138,12 +142,11 @@
     }
 
 
+        //Lista de todos os jogos
      axios.get("http://localhost:8080/games", axiosConfig).then(response => {
         var games = response.data
         var list =  document.getElementById('games')
-
-
-
+        
         games.forEach(game => {
             var item = document.createElement("li")
             item.innerHTML = `${game.id} - ${game.title} - ${game.price}`

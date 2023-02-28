@@ -25,7 +25,7 @@ function auth(req, res, next) { //Middleware
         jwt.verify(token,jwtSecret,(erro, data) => {
             if(erro) {
                 res.status(401)
-                res.json({err: "Token Inválido"})
+                res.json({erro: "Token Inválido"})
             } else {
                 req.token = token
                 req.loggedUser = {id: data.id, email: data.email}
@@ -75,7 +75,7 @@ let DB = {
         {
             id: 20,
             name: "Remix",
-            email: "guigg@gmail.com",
+            email: "gui@gmail.com",
             password: "Java123"
         }
     ]
@@ -86,8 +86,27 @@ let DB = {
 //Get (Buscar todos os itens)
 
 app.get("/games",auth, (req, res) => {
+
+    var hateoas = [
+        {
+            href: "http://localhost:8080/game/0",
+            method: "DELETE",
+            rel: "delete_game"
+        },
+        {
+            href: "http://localhost:8080/game/0",
+            method: "GET",
+            rel: "get_game"
+        },
+        {
+            href: "http://localhost:8080/auth",
+            method: "POST",
+            rel: "login"
+        }
+    ]
+
     res.statusCode = 200
-    res.json(DB.games)
+    res.json({games: DB.games, _links: hateoas})
 })
 
 
@@ -101,13 +120,36 @@ app.get("/game/:id", (req, res) => {
         res.sendStatus = 400
     } else {
 
-        let id = parseInt(req.params.id)
-        
-        let game = DB.games.find(g => g.id == id)
+        var id = parseInt(req.params.id)
+
+        var hateoas = [
+            {
+                href: "http://localhost:8080/game/" + id,
+                method: "DELETE",
+                rel: "delete_game"
+            },
+            {
+                href: "http://localhost:8080/game/" + id,
+                method: "GET",
+                rel: "get_game"
+            },
+            {
+                href: "http://localhost:8080/games",
+                method: "GET",
+                rel: "get_all_games"
+            },
+            {
+                href: "http://localhost:8080/game/" + id,
+                method: "PUT",
+                rel: "edit_game"
+            }
+        ]
+
+        var game = DB.games.find(g => g.id == id)
 
         if(game != undefined) {
             res.statusCode = 200
-            res.json(game)
+            res.json({game, _links: hateoas})
         } else {
             res.sendStatus = 404
         }
@@ -214,7 +256,7 @@ app.post("/auth", (req, res) => {
                })
             } else {
                 res.status(401);
-                res.json({err: "Senha Inválida!"})
+                res.json({erro: "Credenciais incorretos!"})
             }
 
         } else {
@@ -227,7 +269,6 @@ app.post("/auth", (req, res) => {
         console.log("Erro")
     }
 })
-
 
 
 //Conexão
